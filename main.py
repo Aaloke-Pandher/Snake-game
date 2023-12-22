@@ -8,8 +8,7 @@ White = [255, 255, 255]
 Blue = [0, 0, 255]  
 Red = [255, 0, 0] 
 Green = [0, 255, 0]  
-Black = [0, 0, 0] 
-# Global  
+Black = [0, 0, 0]  
 
 # Player class 
 class Player:
@@ -20,11 +19,16 @@ class Player:
         self.h = h 
         self.xspeed = 5 
         self.yspeed = 5  
+
     def drawPlayer(self, screen): 
         pygame.draw.rect(screen, Green, [self.x, self.y, self.w, self.h]) 
+
     def MoveUP(self):
         self.y -= self.yspeed
 
+# Collision Function 
+def rectCollision(rect1, rect2): 
+   return rect1.x < rect2.x + rect2.w and rect1.y < rect2.y + rect2.h and rect1.x + rect1.w > rect2.x and rect1.y + rect1.h > rect2.y
 
 player = Player(400, 300, 20, 20)
 # Main function 
@@ -46,6 +50,7 @@ def main():
         for event in pygame.event.get(): 
             if event.type == pygame.QUIT: 
                 done = True  
+
            # Check Key Pressed for Player Movement
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
