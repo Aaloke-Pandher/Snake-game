@@ -18,13 +18,26 @@ class Player:
         self.w = w 
         self.h = h 
         self.xspeed = 5 
-        self.yspeed = 5  
+        self.yspeed = 5   
+        self.m = 1
 
     def drawPlayer(self, screen): 
         pygame.draw.rect(screen, Green, [self.x, self.y, self.w, self.h]) 
 
-    def MoveUP(self):
-        self.y -= self.yspeed
+class Food: 
+    def __init__(self, x, y, w, h, c): 
+        self.x = x 
+        self.y = y 
+        self.w = w 
+        self.h = h   
+        self.c = c
+
+    def drawFood(self, screen):   
+        pygame.draw.rect(screen, self.c, [self.x, self.y, self.w, self.h], 2) 
+
+
+# List of Food 
+food = [] 
 
 # Collision Function 
 def rectCollision(rect1, rect2): 
@@ -55,16 +68,28 @@ def main():
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
             player.x -= 5 
+            player.w = -player.w
         elif keys[pygame.K_RIGHT]:
             player.x += 5 
+            player.w = player.w
         elif keys[pygame.K_UP]:
             player.y -= 5     
+            player.w = -player.h
         elif keys[pygame.K_DOWN]:
-            player.y += 5   
+            player.y += 5  
+            player.w = player.h
 
         # Draw 
         screen.fill(Black) 
-        player.drawPlayer(screen)  
+        player.drawPlayer(screen)    
+        if frameCount % 600 == 0: 
+            food.append(Food(random.randrange(0, 800), random.randrange(0, 600), 20, 20, Red)) 
+        for i in range(len(food)): 
+            food[i].drawFood(screen) 
+            if rectCollision(food[i], player):
+                player.w = food[i].w + player.w
+                food.pop(i)
+                break
         pygame.display.flip()
  
         # --- Limit frames
