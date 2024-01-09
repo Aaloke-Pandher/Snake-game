@@ -1,6 +1,7 @@
 # Snake 
 import pygame 
 import random  
+import math
 
 # Define colors 
 Grey = [128, 128, 128] 
@@ -33,8 +34,25 @@ class Food:
         self.c = c
 
     def drawFood(self, screen):   
-        pygame.draw.rect(screen, self.c, [self.x, self.y, self.w, self.h], 2) 
+        pygame.draw.rect(screen, self.c, [self.x, self.y, self.w, self.h], 2)
 
+# Find mouse 
+def mouse_position():
+    pos = pygame.mouse.get_pos() 
+    mouse_x = pos[0]
+    mouse_y = pos[1]
+    return mouse_x, mouse_y   
+
+# Player follow mouse 
+def follow_object(ob2, speed):  
+    run = (mouse_position()[0] - ob2.x) 
+    rise = (mouse_position()[1] - ob2.y) 
+    d = math.sqrt(rise**2 + run**2)
+    dy = (speed * rise) / d 
+    dx = (speed * run) / d 
+    ob2.x += dx
+    ob2.y += dy
+    return dx, dy 
 
 # List of Food 
 food = [] 
@@ -51,6 +69,7 @@ def main():
     size = (800, 600)
     screen = pygame.display.set_mode(size) 
     frameCount = 1
+    Score = 0
     # Loop until the user clicks the close button.
     done = False
  
@@ -64,39 +83,26 @@ def main():
             if event.type == pygame.QUIT: 
                 done = True  
 
-           # Check Key Pressed for Player Movement
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_LEFT]:
-            player.x -= 5 
-            player.w = -player.w
-        elif keys[pygame.K_RIGHT]:
-            player.x += 5 
-            player.w = player.w
-        elif keys[pygame.K_UP]:
-            player.y -= 5     
-            player.w = -player.h
-        elif keys[pygame.K_DOWN]:
-            player.y += 5  
-            player.w = player.h
-
         # Draw 
         screen.fill(Black) 
         player.drawPlayer(screen)    
+        follow_object(player, 2)
         if frameCount % 600 == 0: 
             food.append(Food(random.randrange(0, 800), random.randrange(0, 600), 20, 20, Red)) 
         for i in range(len(food)): 
             food[i].drawFood(screen) 
-            if rectCollision(food[i], player):
+            if rectCollision(food[i], player): 
                 player.w = food[i].w + player.w
-                food.pop(i)
-                break
+                food.pop(i) 
+                Score += 1
+                break 
         pygame.display.flip()
  
         # --- Limit frames
         clock.tick(60) 
         frameCount += 1
-
     # Close window
     pygame.quit()  
+    print("Congratulations you scored: " + str(Score) + " points!")
 
 main()
