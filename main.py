@@ -34,6 +34,17 @@ class Food:
         self.c = c
 
     def drawFood(self, screen):   
+        pygame.draw.rect(screen, self.c, [self.x, self.y, self.w, self.h], 2) 
+
+class Badfood: 
+    def __init__(self, x, y, w, h, c): 
+        self.x = x 
+        self.y = y 
+        self.w = w 
+        self.h = h   
+        self.c = c
+
+    def drawBadFood(self, screen):   
         pygame.draw.rect(screen, self.c, [self.x, self.y, self.w, self.h], 2)
 
 # Find mouse 
@@ -56,6 +67,7 @@ def follow_object(ob2, speed):
 
 # List of Food 
 food = [] 
+badFood = []
 
 # Collision Function 
 def rectCollision(rect1, rect2): 
@@ -88,20 +100,34 @@ def main():
         player.drawPlayer(screen)    
         follow_object(player, 2)
         if frameCount % 600 == 0: 
-            food.append(Food(random.randrange(0, 800), random.randrange(0, 600), 20, 20, Red)) 
+            food.append(Food(random.randrange(0, 800), random.randrange(0, 600), 20, 20, Green)) 
+        if frameCount % 1200 == 0:
+            badFood.append(Badfood(random.randrange(0, 800), random.randrange(0, 600), 20, 20, Red))
         for i in range(len(food)): 
             food[i].drawFood(screen) 
+        for i in range(len(food)): 
             if rectCollision(food[i], player): 
                 player.w = food[i].w + player.w
                 food.pop(i) 
                 Score += 1
                 break 
+        for i in range(len(badFood)):
+            badFood[i].drawBadFood(screen)
+        for i in range(len(badFood)):
+            if rectCollision(badFood[i], player): 
+                player.w = player.w - badFood[i].w
+                badFood.pop(i) 
+                Score -= 1 
+                break 
+        if player.w == 0:
+            pygame.quit() 
+            print("Game Over!")
         pygame.display.flip()
  
         # --- Limit frames
         clock.tick(60) 
         frameCount += 1
-    # Close window
+    # Close window 
     pygame.quit()  
     print("Congratulations you scored: " + str(Score) + " points!")
 
