@@ -18,8 +18,9 @@ class Player:
         self.y = y 
         self.w = w 
         self.h = h 
-        self.xspeed = 5 
-        self.yspeed = 5   
+        self.speed = 2  
+        self.xspeed = 2
+        self.yspeed = 2
         self.m = 1
 
     def drawPlayer(self, screen): 
@@ -45,7 +46,18 @@ class Badfood:
         self.c = c
 
     def drawBadFood(self, screen):   
-        pygame.draw.rect(screen, self.c, [self.x, self.y, self.w, self.h], 2)
+        pygame.draw.rect(screen, self.c, [self.x, self.y, self.w, self.h], 2) 
+
+class PowerUp:
+    def __init__(self, x, y, w, h, c): 
+        self.x = x 
+        self.y = y 
+        self.w = w 
+        self.h = h   
+        self.c = c
+
+    def drawPowerUp(self, screen):   
+        pygame.draw.ellipse(screen, self.c, [self.x, self.y, self.w, self.h], 2) 
 
 # Find mouse 
 def mouse_position():
@@ -67,11 +79,23 @@ def follow_object(ob2, speed):
 
 # List of Food 
 food = [] 
-badFood = []
+badFood = [] 
+powerUP = []
 
 # Collision Function 
 def rectCollision(rect1, rect2): 
-   return rect1.x < rect2.x + rect2.w and rect1.y < rect2.y + rect2.h and rect1.x + rect1.w > rect2.x and rect1.y + rect1.h > rect2.y
+   return rect1.x < rect2.x + rect2.w and rect1.y < rect2.y + rect2.h and rect1.x + rect1.w > rect2.x and rect1.y + rect1.h > rect2.y 
+
+# Wall Collision 
+def wallCollision(rect): 
+    if rect.x >= 800 - rect.w:
+        pygame.quit()
+    elif rect.x <= 0:
+        pygame.quit()
+    elif rect.y >= 600 - rect.h:
+        pygame.quit()  
+    elif rect.y <= 0:
+        pygame.quit()
 
 player = Player(400, 300, 20, 20)
 # Main function 
@@ -98,11 +122,13 @@ def main():
         # Draw 
         screen.fill(Black) 
         player.drawPlayer(screen)    
-        follow_object(player, 2)
+        follow_object(player, player.speed)
         if frameCount % 600 == 0: 
             food.append(Food(random.randrange(0, 800), random.randrange(0, 600), 20, 20, Green)) 
         if frameCount % 1200 == 0:
-            badFood.append(Badfood(random.randrange(0, 800), random.randrange(0, 600), 20, 20, Red))
+            badFood.append(Badfood(random.randrange(0, 800), random.randrange(0, 600), 20, 20, Red)) 
+        if frameCount % 1800 == 0:
+            powerUP.append(PowerUp(random.randrange(0, 800), random.randrange(0, 600), 20, 20, Blue))
         for i in range(len(food)): 
             food[i].drawFood(screen) 
         for i in range(len(food)): 
@@ -119,9 +145,18 @@ def main():
                 badFood.pop(i) 
                 Score -= 1 
                 break 
+        for i in range(len(powerUP)):
+            powerUP[i].drawPowerUp(screen) 
+        for i in range(len(powerUP)):
+            if rectCollision(powerUP[i], player): 
+                player.speed = player.speed + player.speed * 0.1 
+                powerUP.pop(i)
+                break 
         if player.w == 0:
             pygame.quit() 
-            print("Game Over!")
+            print("Game Over, you scored: " + str(Score) + " points!") 
+        if wallCollision(player): 
+            print("Game Over, you scored: " + str(Score) + " points!") 
         pygame.display.flip()
  
         # --- Limit frames
