@@ -117,7 +117,8 @@ player = Player(400, 300, 20, 20)
 def main():
     pygame.init() 
     # Canvas
-    size = (800, 600)
+    size = (800, 600) 
+    tile_size = 20
     screen = pygame.display.set_mode(size) 
     frameCount = 1
     Score = 0 
