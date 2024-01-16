@@ -16,18 +16,22 @@ Black = [0, 0, 0]
 
 # Player class 
 class Player:
-    def __init__(self, x, y, w, h):
+    def __init__(self, x, y, w, h ,c):
         self.x = x 
         self.y = y 
         self.w = w 
-        self.h = h 
+        self.h = h  
+        self.c = c
         self.speed = 2  
         self.xspeed = 2
         self.yspeed = 2
-        self.m = 1
+        self.m = 1 
 
     def drawPlayer(self, screen): 
-        pygame.draw.rect(screen, Green, [self.x, self.y, self.w, self.h]) 
+        pygame.draw.rect(screen, self.c, [self.x, self.y, self.w, self.h]) 
+
+    def rotate(self, angle):
+
 
 class Food: 
     def __init__(self, x, y, w, h, c): 
@@ -62,6 +66,17 @@ class PowerUp:
     def drawPowerUp(self, screen):   
         pygame.draw.ellipse(screen, self.c, [self.x, self.y, self.w, self.h], 2) 
 
+class PowerUpCosmetic: 
+    def __init__(self, x, y, w, h, c):
+        self.x = x 
+        self.y = y 
+        self.w = w 
+        self.h = h   
+        self.c = c
+
+    def drawPowerUpCosmetic(self, screen):   
+        pygame.draw.ellipse(screen, self.c, [self.x, self.y, self.w, self.h]) 
+
 # Find mouse 
 def mouse_position():
     pos = pygame.mouse.get_pos() 
@@ -80,39 +95,34 @@ def follow_object(ob2, speed):
     ob2.y += dy
     return dx, dy 
 
-# List of Food 
+# Lists 
 food = [] 
 badFood = [] 
-powerUP = []
+powerUP = [] 
+cosmeticPowerUp = [] 
+playerList = []
+
 
 # Collision Function 
 def rectCollision(rect1, rect2): 
    return rect1.x < rect2.x + rect2.w and rect1.y < rect2.y + rect2.h and rect1.x + rect1.w > rect2.x and rect1.y + rect1.h > rect2.y 
 
 # Wall Collision 
-def wallCollision(rect, timer, sound, score): 
+def wallCollision(rect, score): 
     if rect.x >= 800 - rect.w:  
-        pygame.mixer.Sound.play(sound)
         print("Game Over, you scored: " + str(score) + " points!") 
-        if timer % 60 == 0: 
-            pygame.quit()
+        pygame.quit()
     elif rect.x <= 0: 
-        pygame.mixer.Sound.play(sound)
         print("Game Over, you scored: " + str(score) + " points!") 
-        if timer % 60 == 0:
-            pygame.quit()
+        pygame.quit()
     elif rect.y >= 600 - rect.h:
-        pygame.mixer.Sound.play(sound)
         print("Game Over, you scored: " + str(score) + " points!") 
-        if timer % 60 == 0:
-            pygame.quit()  
+        pygame.quit()  
     elif rect.y <= 0: 
-        pygame.mixer.Sound.play(sound)
         print("Game Over, you scored: " + str(score) + " points!") 
-        if timer % 60 == 0:
-            pygame.quit() 
+        pygame.quit() 
 
-player = Player(400, 300, 20, 20)
+player = Player(400, 300, 20, 20, Green) 
 # Main function 
 def main():
     pygame.init() 
@@ -142,8 +152,9 @@ def main():
 
         # Draw 
         screen.fill(Black) 
-        player.drawPlayer(screen)    
-        follow_object(player, player.speed) 
+        player.drawPlayer(screen)   
+        follow_object(player, player.speed)  
+        wallCollision(player, Score)
         # Good Food
         if frameCount % 600 == 0: 
             food.append(Food(random.randrange(0, 750), random.randrange(0, 550), 20, 20, Green)) 
@@ -153,6 +164,8 @@ def main():
         # Speed Power Up
         if frameCount % 1800 == 0:
             powerUP.append(PowerUp(random.randrange(0, 750), random.randrange(0, 550), 20, 20, Blue)) 
+        if frameCount % 2400 == 0:
+            cosmeticPowerUp.append(PowerUpCosmetic(random.randrange(0, 750), random.randrange(0, 550), 20, 20, White))
         # Draw good food and bad food collsion 
         for i in range(len(food)): 
             food[i].drawFood(screen) 
@@ -182,13 +195,18 @@ def main():
                 pygame.mixer.Sound.play(levelUpSound)
                 powerUP.pop(i)
                 break 
+        # Draw cosmetic power up and power up collsion
+        for i in range(len(cosmeticPowerUp)):
+            cosmeticPowerUp[i].drawPowerUpCosmetic(screen) 
+        for i in range(len(cosmeticPowerUp)):
+            if rectCollision(cosmeticPowerUp[i], player): 
+                player.c = [random.randrange(0, 255), random.randrange(0, 255), random.randrange(0, 255)] 
+                pygame.mixer.Sound.play(levelUpSound)
+                cosmeticPowerUp.pop(i)
+                break
         if player.w == 0:
             pygame.quit() 
-            print("Game Over, you scored: " + str(Score) + " points!") 
-        # Wall Collision 
-        if wallCollision(player, frameCount, crashSound, Score):
-            frameCount = 0
-            frameCount += 1
+            print("Game Over, you scored: " + str(Score) + " points!")
         pygame.display.flip()
  
         # --- Limit frames
